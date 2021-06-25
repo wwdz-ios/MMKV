@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
           Text('MMKV Version: ${MMKV.version}\n'),
           TextButton(
               onPressed: () {
-                funtionalTest();
+                functionalTest();
               },
               child: Text('Functional Test', style: TextStyle(fontSize: 18))),
           TextButton(
@@ -78,8 +78,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void funtionalTest() {
-    // var mmkv = MMKV("test");
+  void functionalTest() {
+    /* Note: If you come across to failing to load defaultMMKV() on Android after upgrading Flutter from 1.20+ to 2.0+,
+     * you can try passing this encryption key '\u{2}U' instead.
+     * var mmkv = MMKV.defaultMMKV(cryptKey: '\u{2}U');
+     */
     var mmkv = MMKV.defaultMMKV();
     mmkv.encodeBool('bool', true);
     print('bool = ${mmkv.decodeBool('bool')}');
@@ -106,12 +109,20 @@ class _MyAppState extends State<MyApp> {
     mmkv.encodeString('string', str);
     print('string = ${mmkv.decodeString('string')}');
 
+    mmkv.encodeString('string', '');
+    print('empty string = ${mmkv.decodeString('string')}');
+    print('contains "string": ${mmkv.containsKey('string')}');
+
+    mmkv.encodeString('string', null);
+    print('null string = ${mmkv.decodeString('string')}');
+    print('contains "string": ${mmkv.containsKey('string')}');
+
     str += ' with bytes';
-    var bytes = MMBuffer.fromList(Utf8Encoder().convert(str));
+    var bytes = MMBuffer.fromList(Utf8Encoder().convert(str))!;
     mmkv.encodeBytes('bytes', bytes);
     bytes.destroy();
-    bytes = mmkv.decodeBytes('bytes');
-    print('bytes = ${Utf8Decoder().convert(bytes.asList())}');
+    bytes = mmkv.decodeBytes('bytes')!;
+    print('bytes = ${Utf8Decoder().convert(bytes.asList()!)}');
     bytes.destroy();
 
     print('contains "bool": ${mmkv.containsKey('bool')}');
@@ -130,11 +141,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   MMKV testMMKV(
-      String mmapID, String cryptKey, bool decodeOnly, String rootPath) {
+      String mmapID, String? cryptKey, bool decodeOnly, String? rootPath) {
     final mmkv = MMKV(mmapID, cryptKey: cryptKey, rootDir: rootPath);
-    if (mmkv == null) {
-      return null;
-    }
 
     if (!decodeOnly) {
       mmkv.encodeBool('bool', true);
@@ -178,13 +186,13 @@ class _MyAppState extends State<MyApp> {
     print('string = ${mmkv.decodeString('string')}');
 
     str += ' with bytes';
-    var bytes = MMBuffer.fromList(Utf8Encoder().convert(str));
+    var bytes = MMBuffer.fromList(Utf8Encoder().convert(str))!;
     if (!decodeOnly) {
       mmkv.encodeBytes('bytes', bytes);
     }
     bytes.destroy();
-    bytes = mmkv.decodeBytes('bytes');
-    print('bytes = ${Utf8Decoder().convert(bytes.asList())}');
+    bytes = mmkv.decodeBytes('bytes')!;
+    print('bytes = ${Utf8Decoder().convert(bytes.asList()!)}');
     bytes.destroy();
 
     print('contains "bool": ${mmkv.containsKey('bool')}');
@@ -199,9 +207,6 @@ class _MyAppState extends State<MyApp> {
   void testReKey() {
     final mmapID = 'testAES_reKey1';
     MMKV kv = testMMKV(mmapID, null, false, null);
-    if (kv == null) {
-      return;
-    }
 
     kv.reKey("Key_seq_1");
     kv.clearMemoryCache();

@@ -17,14 +17,13 @@ public class MyApplication extends Application implements MMKVHandler, MMKVConte
         // set root dir
         //String rootDir = MMKV.initialize(this);
         String dir = getFilesDir().getAbsolutePath() + "/mmkv";
-        String rootDir = MMKV.initialize(dir, new MMKV.LibLoader() {
+        String rootDir = MMKV.initialize(this, dir, new MMKV.LibLoader() {
             @Override
             public void loadLibrary(String libName) {
                 ReLinker.loadLibrary(MyApplication.this, libName);
             }
         }, MMKVLogLevel.LevelInfo);
         Log.i("MMKV", "mmkv root: " + rootDir);
-        Log.i("MMKV", "mmkv version: " + MMKV.version());
 
         // set log level
         MMKV.setLogLevel(MMKVLogLevel.LevelInfo);
